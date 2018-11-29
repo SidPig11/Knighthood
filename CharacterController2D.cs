@@ -4,18 +4,18 @@ using UnityEngine.Events;
 public class CharacterController2D : MonoBehaviour
 {
 	[SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
-	[Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;			// Amount of maxSpeed applied to crouching movement. 1 = 100%
-	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-	[SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
-	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
-	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
-	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
-	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
+	[Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;			                // Amount of maxSpeed applied to crouching movement. 1 = 100%
+	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	                        // How much to smooth out the movement
+	[SerializeField] private bool m_AirControl = false;							// Whether or not a player can move while jumping;
+	[SerializeField] private LayerMask m_WhatIsGround;							// Mask determining what is ground to the character
+	[SerializeField] private Transform m_GroundCheck;							// Position marking where to check if the player is grounded.
+	[SerializeField] private Transform m_CeilingCheck;							// Position marking where to check for ceilings
+	[SerializeField] private Collider2D m_CrouchDisableCollider;				                // Collider that will be disabled when crouching
 
 	[SerializeField] private float m_delayGroundCheck = 0.25f;
 
 	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
-	private bool m_Grounded;            // Whether or not the player is grounded.
+	private bool m_Grounded;            // Check if the player is grounded.
 	const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
 	private Rigidbody2D m_Rigidbody2D;
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
@@ -59,8 +59,7 @@ public class CharacterController2D : MonoBehaviour
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
 
-		// The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-		// This can be done using layers instead but Sample Assets will not overwrite your project settings.
+		// The player is grounded if a cast to the groundcheck position hits all the things designated as ground
 		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
 		for (int i = 0; i < colliders.Length; i++)
 		{
@@ -79,14 +78,13 @@ public class CharacterController2D : MonoBehaviour
 		// If crouching, check to see if the character can stand up
 		if (!crouch)
 		{
-			// If the character has a ceiling preventing them from standing up, keep them crouching
+			// If the character can't stand up, keep them crouching
 			if (Physics2D.OverlapCircle(m_CeilingCheck.position, k_CeilingRadius, m_WhatIsGround))
 			{
 				crouch = true;
 			}
 		}
 
-		//only control the player if grounded or airControl is turned on
 		if (m_Grounded || m_AirControl)
 		{
 
@@ -120,19 +118,19 @@ public class CharacterController2D : MonoBehaviour
 
 			// Move the character by finding the target velocity
 			Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
-			// And then smoothing it out and applying it to the character
+			// And then smoothing it out
 			m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
-			// If the input is moving the player right and the player is facing left...
+			// If the input is moving the player right and the player is facing left
 			if (move > 0 && !m_FacingRight)
 			{
-				// ... flip the player.
+				// Flip the player.
 				Flip();
 			}
-			// Otherwise if the input is moving the player left and the player is facing right...
+			// Otherwise if the input is moving the player left and the player is facing right
 			else if (move < 0 && m_FacingRight)
 			{
-				// ... flip the player.
+				// Flip the player.
 				Flip();
 			}
 		}
